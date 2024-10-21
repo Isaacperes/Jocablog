@@ -3,13 +3,12 @@ $(document).ready(runProfile)
 firebase.auth().onAuthStateChanged((user) => {
     // Se ususário está logado
     if (user) {
-        console.log(user.metadata.lastSignInTime)
         $('#logged img').attr({
             'src': user.photoURL,
             'alt': user.displayName
         })
-        $('#logged h4').html(user.displayName)
-        $('#id').html(user.uid)
+        $('#logged h2').html(user.displayName)
+        $('#id').html('ID → ' + user.uid)
         $('#email').html(user.email)
         $('#registered').html('Cadastrado em ' + dateConvert(user.metadata.creationTime))
         $('#lastLogin').html('Último login em ' + dateConvert(user.metadata.lastSignInTime))
@@ -22,12 +21,15 @@ firebase.auth().onAuthStateChanged((user) => {
 });
 
 function runProfile() {
+    // Mostra o perfil do usuário no Google
     $('#toGoogle').click(() => {
         window.open('https://myaccount.google.com/', '_blank');
     })
 
+    // Faz logout 
     $('#btnLogout').click(logout);
 
+    // Faz login
     $('#btnLogin').click(login);
 }
 
