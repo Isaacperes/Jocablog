@@ -127,6 +127,7 @@ def articles_search(mysql, query, limit=0):
 
 def most_commented(mysql, limit=4):
     sql = '''
+        -- Seleciona os campos e a contagem de comentários
         SELECT 
             a.art_id, 
             a.art_title,
@@ -134,18 +135,41 @@ def most_commented(mysql, limit=4):
             COUNT(c.com_id) AS comment_count
         FROM 
             article a
+        -- Faz um LEFT JOIN com a tabela comment, contando apenas os comentários cujo com_status é 'on'
         LEFT JOIN 
             comment c ON a.art_id = c.com_article AND c.com_status = 'on'
+        -- Filtra os artigos para incluir apenas aqueles cujo art_status é 'on' e art_date é menor ou igual a NOW()
         WHERE 
             a.art_status = 'on' 
             AND a.art_date <= NOW()
+        -- Agrupa os resultados por art_id, art_title
         GROUP BY 
             a.art_id, a.art_title
+        -- Filtra os grupos para incluir apenas aqueles com contagem de comentários maior que zero
         HAVING 
             comment_count > 0
+        -- Ordena os resultados pela contagem de comentários em ordem decrescente
         ORDER BY 
             comment_count DESC
+        -- Limita os resultados a # registros
         LIMIT %s;
+    '''
+    cur = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    cur.execute(sql, (limit,))
+    articles = cur.fetchall()
+    cur.close()
+
+    return articles
+
+
+def most_viewed(mysql, limit=4):
+    sql = '''
+        SELECT art_id, art_title, art_thumbnail
+        FROM article
+        WHERE art_status = 'on'
+            AND art_date <= NOW()
+        ORDER BY art_view DESC, art_date DESC
+        LIMIT %s
     '''
     cur = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
     cur.execute(sql, (limit,))
